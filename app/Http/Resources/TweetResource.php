@@ -19,6 +19,7 @@ class TweetResource extends JsonResource
             'content' => $this->content,
             'created_at' => $this->created_at->diffForHumans(),
             'user' => $this->whenLoaded('user'),
+            'photo' => $this->getPhoto(),
         ];
     }
 }

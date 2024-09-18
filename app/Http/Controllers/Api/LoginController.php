@@ -15,7 +15,9 @@ class LoginController extends Controller
     public function __invoke(Request $request)
     {
         if (Auth::attempt($request->only('email','password'))){
-            return response()->json(Auth::user());
+            $user = Auth::user();
+            $user['token'] = $user->createToken('WorkshopTDD')->plainTextToken;
+            return response()->json($user);
         };
 
         return response()->json([

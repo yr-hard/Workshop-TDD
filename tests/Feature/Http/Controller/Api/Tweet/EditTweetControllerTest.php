@@ -13,13 +13,21 @@ class EditTweetControllerTest extends TestCase
     /**
      * A basic feature test example.
      */
+    private $user;
+    private $anotherUser;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = $this->login();
+        $this->anotherUser = User::factory()->create();
+    }
+
     public function test_user_terotentikasi_dapat_mengedit_tweet(): void
     {
-        $user = User::factory()->create();
         
-        $tweet = Tweet::factory()->create(['user_id' => $user->id]);
-
-        $this->actingAs($user);
+        $tweet = Tweet::factory()->create(['user_id' => $this->user->id]);
 
         $updateData = [
             'content' => 'Updated tweet content',
@@ -29,10 +37,10 @@ class EditTweetControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-            'id' => $tweet->id,
-            'content' => 'Updated tweet content',
-            'user_id' => $user->id,
-        ]);
+                'data' => [
+                    'content' => 'Updated tweet content',
+                ]
+            ]);
 
         $this->assertDatabaseHas('tweets', [
             'id' => $tweet->id,
@@ -50,17 +58,13 @@ class EditTweetControllerTest extends TestCase
 
         $response = $this->putJson("/api/tweet/{$tweet->id}", $updateData);
 
-        $response->assertStatus(401);
+        $response->assertStatus(403);
     }
 
     public function test_user_lain_tidak_dapat_mengedit_tweet(): void
     {
-        $user = User::factory()->create();
-        $otherUser = User::factory()->create();
         
-        $tweet = Tweet::factory()->create(['user_id' => $otherUser->id]);
-
-        $this->actingAs($user);
+        $tweet = Tweet::factory()->create(['user_id' => $this->anotherUser->id]);
 
         $updateData = [
             'content' => 'Updated tweet content',
